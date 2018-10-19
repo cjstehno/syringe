@@ -1,10 +1,8 @@
-package com.stehno.syringe;
+package com.stehno.syringe.rand;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -13,85 +11,28 @@ import static java.lang.Character.toLowerCase;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 
-public final class PropertyRandomizer {
-    // FIXME: move this method to ObjectRandomizer and make that the main entry point
-
-    public static <T> Randomizer<T> randomize(final Class<T> type, final Consumer<PropertyRandomizerConfig> config) {
-        final PropertyRandomizerConfigImpl randomizerConfig = new PropertyRandomizerConfigImpl();
-        config.accept(randomizerConfig);
-        return new ObjectRandomizer<>(type, randomizerConfig);
-    }
-
-}
-
-interface PropertyRandomizerConfig {
-
-    <P> PropertyRandomizerConfig property(final String name, final Randomizer<P> randomizer);
-
-    <P> PropertyRandomizerConfig propertyType(final Class<P> type, final Randomizer<P> randomizer);
-
-    <P> PropertyRandomizerConfig field(final String name, final Randomizer<P> randomizer);
-
-    <P> PropertyRandomizerConfig fieldType(final Class<P> type, final Randomizer<P> randomizer);
-}
-
-// beware of when prop|field type configs overlap
-class PropertyRandomizerConfigImpl implements PropertyRandomizerConfig {
-
-    private final Map<Class<?>, Randomizer<?>> propertyTypeRandomizers = new HashMap<>();
-    private final Map<String, Randomizer<?>> propertyRandomizers = new HashMap<>();
-    private final Map<Class<?>, Randomizer<?>> fieldTypeRandomizers = new HashMap<>();
-    private final Map<String, Randomizer<?>> fieldRandomizers = new HashMap<>();
-
-    public <P> PropertyRandomizerConfig property(final String name, final Randomizer<P> randomizer) {
-        propertyRandomizers.put(name, randomizer);
-        return this;
-    }
-
-    @Override public <P> PropertyRandomizerConfig propertyType(Class<P> type, Randomizer<P> randomizer) {
-        propertyTypeRandomizers.put(type, randomizer);
-        return this;
-    }
-
-    public <P> PropertyRandomizerConfig field(final String name, final Randomizer<P> randomizer) {
-        fieldRandomizers.put(name, randomizer);
-        return this;
-    }
-
-    public <P> PropertyRandomizerConfig fieldType(final Class<P> type, final Randomizer<P> randomizer) {
-        fieldTypeRandomizers.put(type, randomizer);
-        return this;
-    }
-
-    Optional<Randomizer<?>> propertyTypeRandomizer(final Class<?> type) {
-        final Randomizer<?> randomizer = propertyTypeRandomizers.get(type);
-        return randomizer != null ? Optional.of(randomizer) : Optional.empty();
-    }
-
-    Optional<Randomizer<?>> propertyRandomizer(final String name) {
-        final Randomizer<?> randomizer = propertyRandomizers.get(name);
-        return randomizer != null ? Optional.of(randomizer) : Optional.empty();
-    }
-
-    Optional<Randomizer<?>> fieldRandomizer(final String name) {
-        final Randomizer<?> randomizer = fieldRandomizers.get(name);
-        return randomizer != null ? Optional.of(randomizer) : Optional.empty();
-    }
-
-    Optional<Randomizer<?>> fieldTypeRandomizer(final Class<?> type) {
-        final Randomizer<?> randomizer = fieldTypeRandomizers.get(type);
-        return randomizer != null ? Optional.of(randomizer) : Optional.empty();
-    }
-}
-
-class ObjectRandomizer<T> implements Randomizer<T> {
+public final class ObjectRandomizer<T> implements Randomizer<T> {
 
     private final Class<T> type;
-    private final PropertyRandomizerConfigImpl randomizerConfig;
+    private final RandomizerConfigImpl randomizerConfig;
 
-    ObjectRandomizer(final Class<T> type, final PropertyRandomizerConfigImpl randomizerConfig) {
+    private ObjectRandomizer(final Class<T> type, final RandomizerConfigImpl randomizerConfig) {
         this.type = type;
         this.randomizerConfig = randomizerConfig;
+    }
+
+    /**
+     * Used to configure a Randomizer which will produce random objects built using the specified `RandomizerConfig`.
+     *
+     * @param type the type of object to be created and randomly populated.
+     * @param config the randomizer configuration
+     * @param <T> the type of the randomized object
+     * @return the Randomizer which will produce random instances of the target class.
+     */
+    public static <T> Randomizer<T> randomize(final Class<T> type, final Consumer<RandomizerConfig> config) {
+        final RandomizerConfigImpl randomizerConfig = new RandomizerConfigImpl();
+        config.accept(randomizerConfig);
+        return new ObjectRandomizer<>(type, randomizerConfig);
     }
 
     @Override public T one() {

@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.stehno.syringe.Syringe.inject;
-import static com.stehno.syringe.Syringe.injector;
+import static com.stehno.syringe.inject.Injector.inject;
+import static com.stehno.syringe.inject.Injector.injector;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;

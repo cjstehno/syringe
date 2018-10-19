@@ -1,4 +1,4 @@
-package com.stehno.syringe;
+package com.stehno.syringe.inject;
 
 import java.util.LinkedList;
 import java.util.List;

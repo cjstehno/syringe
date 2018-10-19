@@ -1,4 +1,6 @@
-package com.stehno.syringe;
+package com.stehno.syringe.inject;
+
+import com.stehno.syringe.rand.Randomizer;
 
 import java.lang.reflect.Field;
 import java.util.LinkedList;
@@ -7,15 +9,44 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-final class Injector {
+/**
+ * Utility providing a simple means of injecting field values into objects using reflection, via a builder-style
+ * or DSL-style interface.
+ */
+public final class Injector {
 
     private final Object target;
     private final Class<?> targetClass;
     private final List<Throwable> exceptions = new LinkedList<>();
 
-    Injector(final Object target) {
+    private Injector(final Object target) {
         this.target = target;
         this.targetClass = target.getClass();
+    }
+
+    /**
+     * Used to inject data into one or more fields using reflection, based on the provided injections.
+     *
+     * @param target     the target object where properties will be injected
+     * @param injections the field injection configuration
+     * @param <T>        the type of the target object
+     * @return the instance of the target object passed in (for convenience)
+     */
+    public static <T> T inject(final T target, final Consumer<Injector> injections) {
+        final Injector injector = new Injector(target);
+        injections.accept(injector);
+
+        final Optional<InjectionFailedException> exes = injector.exceptions();
+        if (exes.isPresent()) {
+            throw exes.get();
+        }
+
+        return target;
+    }
+
+    public static <T> Injector injector(final T target) {
+        final Injector injector = new Injector(target);
+        return injector;
     }
 
     public Injector set(final String name, final Object value) {
@@ -25,6 +56,10 @@ final class Injector {
             exceptions.add(ex);
         }
         return this;
+    }
+
+    public Injector randomize(final String name, final Randomizer<?> randomizer) {
+        return set(name, randomizer.one());
     }
 
     public <V> Injector get(final String name, final Class<V> type, final Consumer<V> valueConsumer) {
