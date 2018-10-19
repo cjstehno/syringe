@@ -28,12 +28,19 @@ interface PropertyRandomizerConfig {
 
     <P> PropertyRandomizerConfig property(final String name, final Randomizer<P> randomizer);
 
+    <P> PropertyRandomizerConfig propertyType(final Class<P> type, final Randomizer<P> randomizer);
+
     <P> PropertyRandomizerConfig field(final String name, final Randomizer<P> randomizer);
+
+    <P> PropertyRandomizerConfig fieldType(final Class<P> type, final Randomizer<P> randomizer);
 }
 
+// beware of when prop|field type configs overlap
 class PropertyRandomizerConfigImpl implements PropertyRandomizerConfig {
 
+    private final Map<Class<?>, Randomizer<?>> propertyTypeRandomizers = new HashMap<>();
     private final Map<String, Randomizer<?>> propertyRandomizers = new HashMap<>();
+    private final Map<Class<?>, Randomizer<?>> fieldTypeRandomizers = new HashMap<>();
     private final Map<String, Randomizer<?>> fieldRandomizers = new HashMap<>();
 
     public <P> PropertyRandomizerConfig property(final String name, final Randomizer<P> randomizer) {
@@ -41,9 +48,24 @@ class PropertyRandomizerConfigImpl implements PropertyRandomizerConfig {
         return this;
     }
 
+    @Override public <P> PropertyRandomizerConfig propertyType(Class<P> type, Randomizer<P> randomizer) {
+        propertyTypeRandomizers.put(type, randomizer);
+        return this;
+    }
+
     public <P> PropertyRandomizerConfig field(final String name, final Randomizer<P> randomizer) {
         fieldRandomizers.put(name, randomizer);
         return this;
+    }
+
+    public <P> PropertyRandomizerConfig fieldType(final Class<P> type, final Randomizer<P> randomizer) {
+        fieldTypeRandomizers.put(type, randomizer);
+        return this;
+    }
+
+    Optional<Randomizer<?>> propertyTypeRandomizer(final Class<?> type) {
+        final Randomizer<?> randomizer = propertyTypeRandomizers.get(type);
+        return randomizer != null ? Optional.of(randomizer) : Optional.empty();
     }
 
     Optional<Randomizer<?>> propertyRandomizer(final String name) {
@@ -53,6 +75,11 @@ class PropertyRandomizerConfigImpl implements PropertyRandomizerConfig {
 
     Optional<Randomizer<?>> fieldRandomizer(final String name) {
         final Randomizer<?> randomizer = fieldRandomizers.get(name);
+        return randomizer != null ? Optional.of(randomizer) : Optional.empty();
+    }
+
+    Optional<Randomizer<?>> fieldTypeRandomizer(final Class<?> type) {
+        final Randomizer<?> randomizer = fieldTypeRandomizers.get(type);
         return randomizer != null ? Optional.of(randomizer) : Optional.empty();
     }
 }
@@ -73,17 +100,27 @@ class ObjectRandomizer<T> implements Randomizer<T> {
 
             for (final Method setter : findSetters(type)) {
                 final String propName = propertyName(setter);
+
                 final Optional<Randomizer<?>> propRandomizer = randomizerConfig.propertyRandomizer(propName);
+                final Optional<Randomizer<?>> propTypeRandomizer = randomizerConfig.propertyTypeRandomizer(setter.getParameterTypes()[0]);
+
                 if (propRandomizer.isPresent()) {
                     setter.invoke(instance, propRandomizer.get().one());
+                } else if (propTypeRandomizer.isPresent()) {
+                    setter.invoke(instance, propTypeRandomizer.get().one());
                 }
             }
 
             for (final Field field : findFields(type)) {
                 final Optional<Randomizer<?>> fieldRandomizer = randomizerConfig.fieldRandomizer(field.getName());
+                final Optional<Randomizer<?>> fieldTypeRandomizer = randomizerConfig.fieldTypeRandomizer(field.getType());
+
                 if (fieldRandomizer.isPresent()) {
                     field.setAccessible(true);
                     field.set(instance, fieldRandomizer.get().one());
+                } else if (fieldTypeRandomizer.isPresent()) {
+                    field.setAccessible(true);
+                    field.set(instance, fieldTypeRandomizer.get().one());
                 }
             }
 

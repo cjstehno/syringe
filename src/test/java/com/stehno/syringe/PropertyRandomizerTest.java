@@ -3,8 +3,7 @@ package com.stehno.syringe;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.StringJoiner;
-
+import static com.stehno.syringe.PropertyRandomizer.randomize;
 import static com.stehno.syringe.Randomizers.intRange;
 import static com.stehno.syringe.Randomizers.oneOf;
 import static java.lang.String.format;
@@ -14,11 +13,10 @@ import static java.lang.String.format;
 class PropertyRandomizerTest {
 
     // TODO: more complex things: maps, lists, arrays, objects
-    // TODO: provide type randomizers so that if no specific randomizer exists it will randomize for that type
 
     @Test @DisplayName("General Usage")
     void general_usage() {
-        Randomizer<SomethingElse> rando = PropertyRandomizer.randomize(SomethingElse.class, config -> {
+        Randomizer<SomethingElse> rando = randomize(SomethingElse.class, config -> {
             config.property("name", oneOf("alpha", "bravo", "charlie"));
             config.property("score", intRange(10, 100));
             config.field("added", oneOf("one", "two"));
@@ -29,9 +27,10 @@ class PropertyRandomizerTest {
 
     @Test @DisplayName("General Usage (with global types)")
     void general_usage_with_types() {
-        Randomizer<SomethingElse> rando = PropertyRandomizer.randomize(SomethingElse.class, config -> {
+        Randomizer<SomethingElse> rando = randomize(SomethingElse.class, config -> {
             config.propertyType(String.class, oneOf("alpha", "bravo", "charlie"));
-//            config.fieldType(int.class, );
+            config.property("name", oneOf("Bob", "Joe"));
+            config.fieldType(int.class, intRange(25, 50));
         });
 
         rando.list(5).forEach(System.out::println);
