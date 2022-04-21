@@ -1,6 +1,6 @@
 package com.stehno.syringe.rand;
 
-interface RandomizerConfig {
+public interface RandomizerConfig {
 
     <P> RandomizerConfig property(final String name, final Randomizer<P> randomizer);
 

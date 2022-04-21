@@ -1,5 +1,7 @@
 package com.stehno.syringe.rand;
 
+import lombok.val;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -11,6 +13,7 @@ import static java.lang.Character.toLowerCase;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 
+@SuppressWarnings("ClassCanBeRecord")
 public final class ObjectRandomizer<T> implements Randomizer<T> {
 
     private final Class<T> type;
@@ -24,9 +27,9 @@ public final class ObjectRandomizer<T> implements Randomizer<T> {
     /**
      * Used to configure a Randomizer which will produce random objects built using the specified `RandomizerConfig`.
      *
-     * @param type the type of object to be created and randomly populated.
+     * @param type   the type of object to be created and randomly populated.
      * @param config the randomizer configuration
-     * @param <T> the type of the randomized object
+     * @param <T>    the type of the randomized object
      * @return the Randomizer which will produce random instances of the target class.
      */
     public static <T> Randomizer<T> randomize(final Class<T> type, final Consumer<RandomizerConfig> config) {
@@ -37,7 +40,9 @@ public final class ObjectRandomizer<T> implements Randomizer<T> {
 
     @Override public T one() {
         try {
-            final T instance = type.newInstance();
+            val ctor = type.getDeclaredConstructor();
+            ctor.setAccessible(true);
+            val instance = ctor.newInstance();
 
             for (final Method setter : findSetters(type)) {
                 final String propName = propertyName(setter);
@@ -68,6 +73,7 @@ public final class ObjectRandomizer<T> implements Randomizer<T> {
             return instance;
 
         } catch (Exception e) {
+            e.printStackTrace(); // FIXME: remove
             throw new IllegalArgumentException(e.getMessage());
         }
     }
@@ -91,6 +97,9 @@ public final class ObjectRandomizer<T> implements Randomizer<T> {
 
             superclass = superclass.getSuperclass();
         }
+
+        // FIXME: roll this in
+        setters.forEach(s -> s.setAccessible(true));
 
         return setters;
     }

@@ -3,40 +3,29 @@ plugins {
 }
 
 
-group = 'com.stehno'
+group = 'com.stehno.syringe'
 version = '0.0.1'
 
-sourceCompatibility = 8
-targetCompatibility = 8
+sourceCompatibility = 17
+targetCompatibility = 17
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.3.1"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.1"
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     testImplementation 'org.hamcrest:java-hamcrest:2.0.0.0'
 }
 
 test {
     useJUnitPlatform()
     maxParallelForks = Math.min(Runtime.runtime.availableProcessors(), 8)
-}
-
-configurations {
-    asciidoclet
-}
-
-dependencies {
-    asciidoclet 'org.asciidoctor:asciidoclet:1.+'
-}
-
-javadoc {
-    options.docletpath = configurations.asciidoclet.files.asType(List)
-    options.links("http://docs.oracle.com/javase/8/docs/api/", "http://docs.groovy-lang.org/latest/html/gapi/");
-    options.doclet = 'org.asciidoctor.Asciidoclet'
-    options.overview = "src/main/java/overview.adoc"
-    options.addStringOption "-base-dir", "${projectDir}"
-    options.addStringOption "-attribute", "name=${project.name},version=${project.version},title-link=http://stehno.com[${project.name} ${project.version}]"
 }

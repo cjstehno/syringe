@@ -1,4 +1,0 @@
-= Syringe Injection Utilities
-
-A prototype project for working with injecting data into objects with a fluid reflection
-interface.
