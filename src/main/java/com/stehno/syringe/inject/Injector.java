@@ -49,6 +49,17 @@ public final class Injector {
         return injector;
     }
 
+    // FIXME: use setters if available (allow skip)?
+    // allow useSetters config (boolean) at global level
+    // SetOptions(DEFAULT, USE_SETTER, IGNORE_SETTER)
+
+    /**
+     * Sets the value of a named field or property to the provided value.
+     *
+     * @param name
+     * @param value
+     * @return
+     */
     public Injector set(final String name, final Object value) {
         try {
             findField(name).set(target, value);
