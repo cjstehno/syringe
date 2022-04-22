@@ -1,6 +1,21 @@
+/**
+ * Copyright (C) 2022 Christopher J. Stehno
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.cjstehno.syringe.rando;
 
-import io.github.cjstehno.syringe.rando.Randomizer;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import java.lang.reflect.Field;
@@ -13,17 +28,13 @@ import java.util.stream.Collectors;
 import static java.lang.Character.toLowerCase;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static lombok.AccessLevel.PRIVATE;
 
-@SuppressWarnings("ClassCanBeRecord")
+@RequiredArgsConstructor(access = PRIVATE) @SuppressWarnings("ClassCanBeRecord")
 public final class ObjectRandomizer<T> implements Randomizer<T> {
 
     private final Class<T> type;
     private final RandomizerConfigImpl randomizerConfig;
-
-    private ObjectRandomizer(final Class<T> type, final RandomizerConfigImpl randomizerConfig) {
-        this.type = type;
-        this.randomizerConfig = randomizerConfig;
-    }
 
     /**
      * Used to configure a Randomizer which will produce random objects built using the specified `RandomizerConfig`.
@@ -45,7 +56,7 @@ public final class ObjectRandomizer<T> implements Randomizer<T> {
             ctor.setAccessible(true);
             val instance = ctor.newInstance();
 
-            for (final Method setter : findSetters(type)) {
+            for (val setter : findSetters(type)) {
                 final String propName = propertyName(setter);
 
                 final Optional<Randomizer<?>> propRandomizer = randomizerConfig.propertyRandomizer(propName);
@@ -58,7 +69,7 @@ public final class ObjectRandomizer<T> implements Randomizer<T> {
                 }
             }
 
-            for (final Field field : findFields(type)) {
+            for (val field : findFields(type)) {
                 final Optional<Randomizer<?>> fieldRandomizer = randomizerConfig.fieldRandomizer(field.getName());
                 final Optional<Randomizer<?>> fieldTypeRandomizer = randomizerConfig.fieldTypeRandomizer(field.getType());
 
