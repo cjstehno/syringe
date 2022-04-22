@@ -1,5 +1,6 @@
-package com.stehno.syringe.rand;
+package io.github.cjstehno.syringe.rando;
 
+import io.github.cjstehno.syringe.rando.Randomizer;
 import lombok.val;
 
 import java.lang.reflect.Field;

@@ -1,4 +1,4 @@
-package com.stehno.syringe.rand;
+package io.github.cjstehno.syringe.rando;
 
 import java.util.HashMap;
 import java.util.Map;

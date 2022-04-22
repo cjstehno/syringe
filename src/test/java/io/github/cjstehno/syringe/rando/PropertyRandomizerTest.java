@@ -1,15 +1,14 @@
-package com.stehno.syringe;
+package io.github.cjstehno.syringe.rando;
 
-import com.stehno.syringe.rand.Randomizer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.stehno.syringe.rand.ObjectRandomizer.randomize;
-import static com.stehno.syringe.rand.Randomizers.intRange;
-import static com.stehno.syringe.rand.Randomizers.oneOf;
+import static io.github.cjstehno.syringe.rando.ObjectRandomizer.randomize;
+import static io.github.cjstehno.syringe.rando.Randomizers.intRange;
+import static io.github.cjstehno.syringe.rando.Randomizers.oneOf;
 import static java.lang.String.format;
 
 class PropertyRandomizerTest {
@@ -28,14 +27,14 @@ class PropertyRandomizerTest {
     }
 
     @Test @DisplayName("Randomizing nested objects")
-    void nested_objects(){
+    void nested_objects() {
         Randomizer<SomethingElse> randoThing = randomize(SomethingElse.class, config -> {
             config.property("name", oneOf("alpha", "bravo", "charlie"));
             config.property("score", intRange(10, 100));
             config.field("added", oneOf("one", "two"));
         });
 
-        Randomizer<Holder> rando = randomize(Holder.class, cfg->{
+        Randomizer<Holder> rando = randomize(Holder.class, cfg -> {
             cfg.property("thing", randoThing);
         });
 

@@ -1,9 +1,10 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id "com.github.hierynomus.license" version '0.16.1'
+    id 'jacoco'
 }
 
-
-group = 'com.stehno.syringe'
+group = 'io.github.cjstehno.syringe'
 version = '0.0.1'
 
 sourceCompatibility = 17
@@ -28,4 +29,19 @@ dependencies {
 test {
     useJUnitPlatform()
     maxParallelForks = Math.min(Runtime.runtime.availableProcessors(), 8)
+}
+
+jacocoTestReport {
+    dependsOn test
+}
+
+
+license {
+    header = file('config/license_header.txt')
+
+    ignoreFailures false
+
+    ext.year = Calendar.instance.get(Calendar.YEAR)
+
+    excludes(['**/*.txt', '**/*.dtd', '**/*.xml', '**/*.ent', '**/*.jks', '**/*.jpg'])
 }
